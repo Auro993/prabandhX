@@ -1,40 +1,36 @@
 package com.prabandhx.prabandhx.controller;
 
-import com.prabandhx.prabandhx.entity.Project;
-import com.prabandhx.prabandhx.security.JwtUtil;
+import com.prabandhx.prabandhx.dto.ProjectRequestDTO;
+import com.prabandhx.prabandhx.dto.ProjectResponseDTO;
 import com.prabandhx.prabandhx.service.ProjectService;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/projects")
+@PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
 public class ProjectController {
 
-    @Autowired
-    private ProjectService projectService;
+    private final ProjectService projectService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @PostMapping
-    public Project create(@RequestBody Project project,
-                          HttpServletRequest request) {
-
-        String token = request.getHeader("Authorization").substring(7);
-        String email = jwtUtil.extractEmail(token);
-
-        return projectService.createProject(project, email);
+    public ProjectController(ProjectService projectService) {
+        this.projectService = projectService;
     }
 
+    @PostMapping
+    public ProjectResponseDTO create(@Valid @RequestBody ProjectRequestDTO dto) {
+        return projectService.createProject(dto);
+    }
+
+    // ✅ PAGINATION ENABLED
     @GetMapping
-    public List<Project> getAll(HttpServletRequest request) {
+    public Page<ProjectResponseDTO> getAll(
+            @PageableDefault(size = 5) Pageable pageable) {
 
-        String token = request.getHeader("Authorization").substring(7);
-        String email = jwtUtil.extractEmail(token);
-
-        return projectService.getAllProjects(email);
+        return projectService.getAllProjects(pageable);
     }
 }

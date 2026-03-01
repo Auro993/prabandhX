@@ -1,11 +1,15 @@
 package com.prabandhx.prabandhx.service;
 
-import com.prabandhx.prabandhx.dto.*;
-import com.prabandhx.prabandhx.entity.*;
-import com.prabandhx.prabandhx.repository.*;
+import com.prabandhx.prabandhx.dto.AuthRequest;
+import com.prabandhx.prabandhx.dto.AuthResponse;
+import com.prabandhx.prabandhx.dto.RegisterRequest;
+import com.prabandhx.prabandhx.entity.Organization;
+import com.prabandhx.prabandhx.entity.User;
+import com.prabandhx.prabandhx.repository.OrganizationRepository;
+import com.prabandhx.prabandhx.repository.UserRepository;
 import com.prabandhx.prabandhx.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,22 +27,29 @@ public class AuthService {
     @Autowired
     private BCryptPasswordEncoder encoder;
 
+    // ============================
+    // REGISTER USER
+    // ============================
     public void register(RegisterRequest request) {
 
+        // Check email already exists
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
 
-        Organization org =
-                organizationRepository.findById(
-                        request.getOrganizationId())
-                        .orElseThrow(() ->
-                                new RuntimeException("Organization not found"));
+        // Find organization
+        Organization org = organizationRepository
+                .findById(request.getOrganizationId())
+                .orElseThrow(() ->
+                        new RuntimeException("Organization not found"));
 
+        // Create user
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(encoder.encode(request.getPassword()));
+        user.setPassword(
+                encoder.encode(request.getPassword())
+        );
 
         // Always store role with ROLE_ prefix
         user.setRole("ROLE_" + request.getRole());
@@ -48,18 +59,30 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    // ============================
+    // LOGIN USER
+    // ============================
     public AuthResponse login(AuthRequest request) {
 
-        User user = userRepository.findByEmail(request.getEmail())
+        // Find user
+        User user = userRepository
+                .findByEmail(request.getEmail())
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
-        if (!encoder.matches(request.getPassword(),
+        // Check password
+        if (!encoder.matches(
+                request.getPassword(),
                 user.getPassword())) {
+
             throw new RuntimeException("Invalid credentials");
         }
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        // Generate JWT with ROLE
+        String token = jwtUtil.generateToken(
+                user.getEmail(),
+                user.getRole()
+        );
 
         return new AuthResponse(token);
     }
