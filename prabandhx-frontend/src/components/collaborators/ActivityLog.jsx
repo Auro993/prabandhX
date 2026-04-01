@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; 
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiClock, FiUser, FiMail, FiEdit, FiTrash2, FiUserPlus, FiCheck, FiX } from 'react-icons/fi';
 import { collaboratorService } from '../../services/collaboratorService';
