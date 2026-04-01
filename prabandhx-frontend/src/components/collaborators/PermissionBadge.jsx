@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'; 
 import './Collaborators.css';
 
 const PermissionBadge = ({ permission, size = 'medium' }) => {
