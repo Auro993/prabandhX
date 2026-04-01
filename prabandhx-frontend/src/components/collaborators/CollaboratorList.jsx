@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';  
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiUserPlus, FiSearch, FiFilter } from 'react-icons/fi';
 import CollaboratorCard from './CollaboratorCard';
