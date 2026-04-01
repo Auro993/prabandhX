@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; 
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiClock, FiEdit2, FiTrash2, FiCheck, FiX } from 'react-icons/fi';
 import PermissionBadge from './PermissionBadge';
